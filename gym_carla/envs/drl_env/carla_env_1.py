@@ -3,11 +3,28 @@ This is a developing version if carla_env.
 
 Some modifications are made based on original carla_env:
 
- - Fix
+ - Fix reset method, get lidar data correctly
 
 """
 
+import copy
+import numpy as np
+import pygame
+import random
+import time
+from skimage.transform import resize
+
+import gym
+from gym import spaces
+from gym.utils import seeding
+
+import carla
+
 from gym_carla.envs.carla_env import CarlaEnv
+
+from gym_carla.envs.render import BirdeyeRender
+from gym_carla.envs.route_planner import RoutePlanner
+from gym_carla.envs.misc import *
 
 
 class CarlaEnv_1(CarlaEnv):
@@ -115,16 +132,17 @@ class CarlaEnv_1(CarlaEnv):
         # fixme test this
         self.lidar_sensor.listen(lambda data: get_lidar_data(data))
 
-        # Add camera sensor
-        self.camera_sensor = self.world.spawn_actor(self.camera_bp, self.camera_trans, attach_to=self.ego)
-        self.camera_sensor.listen(lambda data: get_camera_img(data))
-
+        # ====================  camera  ====================
         def get_camera_img(data):
             array = np.frombuffer(data.raw_data, dtype=np.dtype("uint8"))
             array = np.reshape(array, (data.height, data.width, 4))
             array = array[:, :, :3]
             array = array[:, :, ::-1]
             self.camera_img = array
+
+        # Add camera sensor
+        self.camera_sensor = self.world.spawn_actor(self.camera_bp, self.camera_trans, attach_to=self.ego)
+        self.camera_sensor.listen(lambda data: get_camera_img(data))
 
         # Update timesteps
         self.time_step = 0
