@@ -37,7 +37,25 @@ class TestEnvRunLoop:
                  params,
                  ):
 
+        # init basic env
         self.env = CarlaEnv_1(params)
+
+        # init env through gym make
+        gym_spec = gym.spec(env_name)
+        gym_env = gym_spec.make(params=env_params)
+
+        # test obs channels
+        if obs_channels:
+            gym_env = filter_observation_wrapper.FilterObservationWrapper(gym_env, obs_channels)
+
+        py_env = gym_wrapper.GymWrapper(
+            gym_env,
+            discount=discount,
+            auto_reset=True,
+        )
+
+        # test generation of tf_env
+        tf_env = tf_py_environment.TFPyEnvironsment(py_env)
 
     def run(self):
 
