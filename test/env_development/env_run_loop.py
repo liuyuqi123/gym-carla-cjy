@@ -28,17 +28,27 @@ except IndexError:
 
 import carla
 
+import gym
+
+from tf_agents.environments import tf_py_environment
+from tf_agents.environments import gym_wrapper
+
+from interp_e2e_driving.environments import filter_observation_wrapper
+
 from gym_carla.envs.drl_env.carla_env_1 import CarlaEnv_1
 
 
 class TestEnvRunLoop:
 
     def __init__(self,
-                 params,
+                 env_name,
+                 discount,
+                 obs_channels,
+                 env_params,
                  ):
 
         # init basic env
-        self.env = CarlaEnv_1(params)
+        self.env = CarlaEnv_1(env_params)
 
         # init env through gym make
         gym_spec = gym.spec(env_name)
@@ -94,6 +104,8 @@ def main():
     display_route = True,
     pixor_size = 64,
     pixor = False,
+
+    # check all available obs channels
     obs_channels = None,
     action_repeat = 1
 
@@ -126,7 +138,10 @@ def main():
     }
 
     TestEnvRunLoop(
-        env_params,
+        env_name=env_name,
+        discount=discount,
+        obs_channels=obs_channels,
+        env_params=env_params,
     )
 
 
